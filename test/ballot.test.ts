@@ -1,4 +1,4 @@
-import { expect } from "chai";
+import { expect, assert } from "chai";
 import { ethers } from "hardhat";
 import { Ballot } from "../typechain-types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
@@ -17,6 +17,8 @@ function convertStringArrayToBytes32(array: string[]) {
 describe("Ballot", function () {
   let ballotContract: Ballot;
   let deployer: SignerWithAddress;
+  let chairperson: stirng;
+  let anotherAddress: SignerWithAddress;
 
 
   beforeEach(async function () {
@@ -25,7 +27,8 @@ describe("Ballot", function () {
       convertStringArrayToBytes32(PROPOSALS)
     );
     await ballotContract.deployed();
-    [deployer] = await ethers.getSigners();
+    [deployer, anotherAddress] = await ethers.getSigners();
+    chairperson = await ballotContract.chairperson();
   });
 
   describe("when the contract is deployed", function () {
@@ -45,30 +48,30 @@ describe("Ballot", function () {
           }
     });
     it("sets the deployer address as chairperson", async function () {
-        let chairperson: string = await ballotContract.chairperson();
-            expect (deployer.address).to.eq(chairperson)
+        expect (deployer.address).to.eq(chairperson)
         });
     it("sets the voting weight for the chairperson as 1", async function () {
-        let chairperson: string = await ballotContract.chairperson();
         let voter = await ballotContract.voters(chairperson)
         expect(voter.weight.toNumber()).to.eq(1)
         });
   });
 
-//   describe("when the chairperson interacts with the giveRightToVote function in the contract", function () {
-//     it("gives right to vote for another address", async function () {
-//       // TODO
-//       throw Error("Not implemented");
-//     });
-//     it("can not give right to vote for someone that has voted", async function () {
-//       // TODO
-//       throw Error("Not implemented");
-//     });
-//     it("can not give right to vote for someone that has already voting rights", async function () {
-//       // TODO
-//       throw Error("Not implemented");
-//     });
-//   });
+   describe("when the chairperson interacts with the giveRightToVote function in the contract", function () {
+     it("gives right to vote for another address", async function () {
+        await expect(ballotContract.giveRightToVote(anotherAddress.address)).to.be.ok
+     });
+    it("can not give right to vote for someone that has voted", async function () {
+        await ballotContract.giveRightToVote(anotherAddress.address);
+        await ballotContract.connect(anotherAddress).vote(1)
+        await expect(ballotContract.giveRightToVote(anotherAddress.address)).to.be.revertedWith("The voter already voted.")
+    });
+    it("can not give right to vote for someone that has already voting rights", async function () {
+        await ballotContract.giveRightToVote(anotherAddress.address);
+        let voter = await ballotContract.voters(anotherAddress.address)
+        expect(voter.weight.toNumber()).to.eq(1)
+        await expect(ballotContract.giveRightToVote(anotherAddress.address)).to.be.reverted
+     });
+   });
 
 //   describe("when the voter interact with the vote function in the contract", function () {
 //     // TODO
