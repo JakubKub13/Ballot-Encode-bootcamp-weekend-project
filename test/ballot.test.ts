@@ -20,6 +20,7 @@ describe("Ballot", function () {
   let deployer: SignerWithAddress;
   let chairperson: stirng;
   let anotherAddress: SignerWithAddress;
+  let thirdAddress: SignerWithAddress;
 
 
   beforeEach(async function () {
@@ -28,7 +29,7 @@ describe("Ballot", function () {
       convertStringArrayToBytes32(PROPOSALS)
     );
     await ballotContract.deployed();
-    [deployer, anotherAddress] = await ethers.getSigners();
+    [deployer, anotherAddress, thirdAddress] = await ethers.getSigners();
     chairperson = await ballotContract.chairperson();
   });
 
@@ -85,12 +86,19 @@ describe("Ballot", function () {
     });
   });
 
-//   describe("when the voter interact with the delegate function in the contract", function () {
-//     // TODO
-//     it("should transfer voting power", async () => {
-//       throw Error("Not implemented");
-//     });
-//   });
+  describe("when the voter interact with the delegate function in the contract", function () {
+    it("should transfer voting power", async () => {
+        await ballotContract.giveRightToVote(anotherAddress.address);
+        await ballotContract.giveRightToVote(thirdAddress.address);
+        let voter1 = await ballotContract.voters(anotherAddress.address);
+        expect(voter1.weight.toNumber()).to.eq(1);
+        expect(voter1.voted).to.eq(false);
+        await ballotContract.connect(anotherAddress).delegate(thirdAddress.address);
+        let delegatedVoter = await ballotContract.voters(thirdAddress.address);
+        expect(delegatedVoter.weight.toNumber()).to.eq(2);
+        expect(delegatedVoter.voted).to.eq(false);
+    });
+  });
 
 //   describe("when the an attacker interact with the giveRightToVote function in the contract", function () {
 //     // TODO
@@ -148,5 +156,6 @@ describe("Ballot", function () {
 //     });
 //   });
  });
+
 
 
