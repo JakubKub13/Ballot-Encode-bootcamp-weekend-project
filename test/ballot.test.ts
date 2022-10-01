@@ -21,6 +21,7 @@ describe("Ballot", function () {
   let chairperson: stirng;
   let anotherAddress: SignerWithAddress;
   let thirdAddress: SignerWithAddress;
+  let attacker: SignerWithAddress;
 
 
   beforeEach(async function () {
@@ -29,7 +30,7 @@ describe("Ballot", function () {
       convertStringArrayToBytes32(PROPOSALS)
     );
     await ballotContract.deployed();
-    [deployer, anotherAddress, thirdAddress] = await ethers.getSigners();
+    [deployer, anotherAddress, thirdAddress, attacker] = await ethers.getSigners();
     chairperson = await ballotContract.chairperson();
   });
 
@@ -100,47 +101,44 @@ describe("Ballot", function () {
     });
   });
 
-//   describe("when the an attacker interact with the giveRightToVote function in the contract", function () {
-//     // TODO
-//     it("should revert", async () => {
-//       throw Error("Not implemented");
-//     });
-//   });
+  describe("when the an attacker interact with the giveRightToVote function in the contract", function () {
+    it("should revert", async () => {
+        await expect(ballotContract.connect(attacker).giveRightToVote(thirdAddress.address)).to.be.revertedWith('Only chairperson can give right to vote.');
+    });
+  });
 
-//   describe("when the an attacker interact with the vote function in the contract", function () {
-//     // TODO
-//     it("should revert", async () => {
-//       throw Error("Not implemented");
-//     });
-//   });
+  describe("when the an attacker interact with the vote function in the contract", function () {
+    it("should revert", async () => {
+        await expect(ballotContract.connect(attacker).vote(1)).to.be.revertedWith('Has no right to vote');
+    });
+  });
 
-//   describe("when the an attacker interact with the delegate function in the contract", function () {
-//     // TODO
-//     it("should revert", async () => {
-//       throw Error("Not implemented");
-//     });
-//   });
+  describe("when the an attacker interact with the delegate function in the contract", function () {
+    it("should revert", async () => {
+        await expect(ballotContract.connect(attacker).delegate(thirdAddress.address)).to.be.revertedWith('You have no right to vote');
+    });
+  });
 
-//   describe("when someone interact with the winningProposal function before any votes are cast", function () {
-//     // TODO
-//     it("should return 0", async () => {
-//       throw Error("Not implemented");
-//     });
-//   });
+  describe("when someone interact with the winningProposal function before any votes are cast", function () {
+    it("should return 0", async () => {
+        expect(await ballotContract.winningProposal()).to.eq(0)
+    });
+  });
 
-//   describe("when someone interact with the winningProposal function after one vote is cast for the first proposal", function () {
-//     // TODO
-//     it("should return 0", async () => {
-//       throw Error("Not implemented");
-//     });
-//   });
+  describe("when someone interact with the winningProposal function after one vote is cast for the first proposal", function () {
+    it("should return 0", async () => {
+        await ballotContract.vote(0);
+        let proposal = await ballotContract.proposals(0);
+        expect(await ballotContract.winningProposal()).to.eq(0);
+    });
+  });
 
-//   describe("when someone interact with the winnerName function before any votes are cast", function () {
-//     // TODO
-//     it("should return name of proposal 0", async () => {
-//       throw Error("Not implemented");
-//     });
-//   });
+  describe("when someone interact with the winnerName function before any votes are cast", function () {
+    it("should return name of proposal 0", async () => {
+        let proposal = await ballotContract.proposals(0);
+        expect(await ballotContract.winnerName()).to.eq(proposal.name)
+    });
+  });
 
 //   describe("when someone interact with the winnerName function after one vote is cast for the first proposal", function () {
 //     // TODO
