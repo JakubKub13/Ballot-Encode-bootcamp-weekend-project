@@ -3,6 +3,7 @@ import { ethers } from "hardhat";
 import { Ballot } from "../typechain-types";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import exp from "constants";
+import { convertToObject } from "typescript";
 
 const PROPOSALS = ["Proposal 1", "Proposal 2", "Proposal 3"];
 
@@ -73,12 +74,16 @@ describe("Ballot", function () {
      });
    });
 
-//   describe("when the voter interact with the vote function in the contract", function () {
-//     // TODO
-//     it("should register the vote", async () => {
-//       throw Error("Not implemented");
-//     });
-//   });
+   describe("when the voter interact with the vote function in the contract", function () {    
+    it("should register the vote", async () => {
+        await ballotContract.giveRightToVote(anotherAddress.address);
+        let voter = await ballotContract.voters(anotherAddress.address)
+        expect(voter.weight.toNumber()).to.eq(1)
+        await ballotContract.connect(anotherAddress).vote(1)
+        let proposal = await ballotContract.proposals(1)
+        expect(proposal.voteCount.toNumber()).to.eq(1)
+    });
+  });
 
 //   describe("when the voter interact with the delegate function in the contract", function () {
 //     // TODO
