@@ -1,6 +1,7 @@
 import { ethers, deployments, network, run } from "hardhat";
 import { Ballot } from "../typechain-types";
-import { HardhatRuntimeEnvironment } from "hardhat/types"
+import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { networkConfig, developmentChains, VERIFICATION_BLOCK_CONFIRMATIONS } from "../hardhat-helper-config";
 import { DeployFunction } from "hardhat-deploy/types"
 const PROPOSALS = ["Proposal 1", "Proposal 2", "Proposal 3"];
 
@@ -20,13 +21,21 @@ const deployBallot: DeployFunction = async function (
   const { deploy, log } = deployments;
   const { deployer } = await getNamedAccounts();
   let ballot: Ballot;
+  const waitBlockConfirmation = developmentChains.includes(network.name) ? 1 : VERIFICATION_BLOCK_CONFIRMATIONS
+
   ballot = await deploy("Ballot", {
     from: deployer,
     log: true,
     args: args,
-    waitConfirmations: 1
+    waitConfirmations: waitBlockConfirmation
   });
- }
+
+  // Verify the deployment
+  if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
+    log("Verifying......")
+    await verify(ballot.address, args)
+  }
+}
 
 export default deployBallot
 deployBallot.tags = ["ballot"]
