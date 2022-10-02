@@ -11,6 +11,7 @@ function convertStringArrayToBytes32(array: string[]) {
   }
   return bytes32Array;
 }
+const args: any[] = [convertStringArrayToBytes32(PROPOSALS)]
 
 const deployBallot: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -19,17 +20,19 @@ const deployBallot: DeployFunction = async function (
   const { deploy, log } = deployments;
   const { deployer } = await getNamedAccounts();
   let ballot: Ballot;
-
   ballot = await deploy("Ballot", {
     from: deployer,
     log: true,
-    args: convertStringArrayToBytes32(PROPOSALS),
+    args: args,
     waitConfirmations: 1
   });
-}
+ }
 
 export default deployBallot
 deployBallot.tags = ["ballot"]
+
+
+
 
 
 
