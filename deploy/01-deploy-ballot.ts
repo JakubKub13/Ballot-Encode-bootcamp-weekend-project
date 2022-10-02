@@ -1,8 +1,10 @@
 import { ethers, deployments, network, run } from "hardhat";
 import { Ballot } from "../typechain-types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { networkConfig, developmentChains, VERIFICATION_BLOCK_CONFIRMATIONS } from "../hardhat-helper-config";
+import { developmentChains, VERIFICATION_BLOCK_CONFIRMATIONS } from "../hardhat-helper-config";
 import { DeployFunction } from "hardhat-deploy/types"
+import verify from "../verify";
+
 const PROPOSALS = ["Proposal 1", "Proposal 2", "Proposal 3"];
 
 function convertStringArrayToBytes32(array: string[]) {
