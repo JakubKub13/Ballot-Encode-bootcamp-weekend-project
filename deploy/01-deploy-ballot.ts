@@ -1,28 +1,37 @@
-import { ethers } from "hardhat";
+import { ethers, deployments, network, run } from "hardhat";
 import { Ballot } from "../typechain-types";
 import { HardhatRuntimeEnvironment } from "hardhat/types"
 import { DeployFunction } from "hardhat-deploy/types"
 const PROPOSALS = ["Proposal 1", "Proposal 2", "Proposal 3"];
 
-async function main() {
-  function convertStringArrayToBytes32(array: string[]) {
-    const bytes32Array = [];
-    for (let index = 0; index < array.length; index++) {
-      bytes32Array.push(ethers.utils.formatBytes32String(array[index]));
-    }
-    return bytes32Array;
+function convertStringArrayToBytes32(array: string[]) {
+  const bytes32Array = [];
+  for (let index = 0; index < array.length; index++) {
+    bytes32Array.push(ethers.utils.formatBytes32String(array[index]));
   }
-  let ballotContract: Ballot;
-
-  const ballotFactory = await ethers.getContractFactory("Ballot");
-  ballotContract = await ballotFactory.deploy(
-    convertStringArrayToBytes32(PROPOSALS)
-  );
-  await ballotContract.deployed();
-
+  return bytes32Array;
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+const deployBallot: DeployFunction = async function (
+  hre: HardhatRuntimeEnvironment
+) {
+  const { deployments, getNamedAccounts, network, ethers } = hre;
+  const { deploy, log } = deployments;
+  const { deployer } = await getNamedAccounts();
+  let ballot: Ballot;
+
+  ballot = await deploy("Ballot", {
+    from: deployer,
+    log: true,
+    args: convertStringArrayToBytes32(PROPOSALS),
+    waitConfirmations: 1
+  });
+}
+
+export default deployBallot
+deployBallot.tags = ["ballot"]
+
+
+
+
+
