@@ -40,7 +40,7 @@ const deployBallot: DeployFunction = async function (
 }
 
 export default deployBallot
-deployBallot.tags = ["ballot"]
+deployBallot.tags = ["ballot", "all"]
 
 
 
