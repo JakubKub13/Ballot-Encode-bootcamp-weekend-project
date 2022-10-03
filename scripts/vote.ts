@@ -9,12 +9,12 @@ async function vote() {
 
     Martin = await ethers.getSigner("0x0148756feD750C4Ba9232297a88B6b82690223ad")
 
-    BallotGoerli = await ethers.getContractAt("Ballot", "0x20CA848E5460D7564c482A2D24c97B85aaff5960", Jacob)
-    const txResponse = await BallotGoerli.delegate(Martin.address)
-    console.log(txResponse)
+    //BallotGoerli = await ethers.getContractAt("Ballot", "0x20CA848E5460D7564c482A2D24c97B85aaff5960", Jacob)
+    //const txResponse = await BallotGoerli.delegate(Martin.address)
+    console.log(deployer)
    
 }
 
-delegate()
+vote()
 
-module.exports = { delegate }
+module.exports = { vote }
